@@ -1,72 +1,39 @@
-/**
- * Fashionable Calendar Engine
- * Handles Date Logic & UI Updates
- */
+// high-css-calendar.js
+function initCalendar(containerId, monthId, yearId, timeId) {
+    let date = new Date();
+    let dMonth = date.getMonth();
+    let dYear = date.getFullYear();
 
-class FashionCalendar {
-    constructor(containerId, timeId) {
-        this.currentDate = new Date();
-        this.displayMonth = this.currentDate.getMonth();
-        this.displayYear = this.currentDate.getFullYear();
-        this.container = document.getElementById(containerId);
-        this.timeDisplay = document.getElementById(timeId);
-        this.monthNames = ["January", "February", "March", "April", "May", "June", 
-                           "July", "August", "September", "October", "November", "December"];
-    }
+    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-    init() {
-        this.render();
-        this.startTime();
-    }
-
-    render() {
-        if (!this.container) return;
+    function render() {
+        const container = document.getElementById(containerId);
+        const firstDay = new Date(dYear, dMonth, 1).getDay();
+        const daysInMonth = new Date(dYear, dMonth + 1, 0).getDate();
         
-        const firstDay = new Date(this.displayYear, this.displayMonth, 1).getDay();
-        const daysInMonth = new Date(this.displayYear, this.displayMonth + 1, 0).getDate();
+        document.getElementById(monthId).innerText = months[dMonth];
+        document.getElementById(yearId).innerText = dYear;
         
-        let html = '';
-        // Add empty slots for previous month
+        container.innerHTML = '';
         for (let i = 0; i < firstDay; i++) {
-            html += '<div class="day empty"></div>';
+            container.innerHTML += '<div class="day empty"></div>';
         }
-        // Add actual days
-        for (let day = 1; day <= daysInMonth; day++) {
-            const isToday = day === this.currentDate.getDate() && 
-                            this.displayMonth === this.currentDate.getMonth() && 
-                            this.displayYear === this.currentDate.getFullYear();
-            html += `<div class="day ${isToday ? 'today' : ''}">${day}</div>`;
+        for (let i = 1; i <= daysInMonth; i++) {
+            let todayClass = (i === date.getDate() && dMonth === date.getMonth() && dYear === date.getFullYear()) ? 'today' : '';
+            container.innerHTML += `<div class="day ${todayClass}">${i}</div>`;
         }
-        
-        this.container.innerHTML = html;
-        this.updateHeader();
     }
 
-    updateHeader() {
-        document.getElementById('monthName').textContent = this.monthNames[this.displayMonth];
-        document.getElementById('yearDisplay').textContent = this.displayYear;
-    }
+    window.changeMonth = (dir) => {
+        dMonth += dir;
+        if (dMonth > 11) { dMonth = 0; dYear++; }
+        else if (dMonth < 0) { dMonth = 11; dYear--; }
+        render();
+    };
 
-    changeMonth(direction) {
-        this.displayMonth += direction;
-        if (this.displayMonth > 11) {
-            this.displayMonth = 0;
-            this.displayYear++;
-        } else if (this.displayMonth < 0) {
-            this.displayMonth = 11;
-            this.displayYear--;
-        }
-        this.render();
-    }
+    setInterval(() => {
+        document.getElementById(timeId).innerText = new Date().toLocaleTimeString();
+    }, 1000);
 
-    startTime() {
-        setInterval(() => {
-            const now = new Date();
-            this.timeDisplay.textContent = now.toLocaleTimeString();
-        }, 1000);
-    }
+    render();
 }
-
-// Auto-initialize if elements exist
-const myCal = new FashionCalendar('daysContainer', 'currentTime');
-window.onload = () => myCal.init();
